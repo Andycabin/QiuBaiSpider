@@ -43,10 +43,10 @@ func GetContent(html string) {
 	file.WriteString("\xEF\xBB\xBF")
 	write := csv.NewWriter(file)
 	for _, value := range results {
-		write.Write([]string{value[1], strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
+		write.Write([]string{strings.Replace(value[1], "\n", "", -1), strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
 		write.Flush()
 		fmt.Println("作者：")
-		fmt.Println(value[1])
+		fmt.Println(strings.Replace(value[1], "\n", "", -1))
 		fmt.Println("段子内容：")
 		fmt.Println(strings.Replace(value[2], "\n", "", -1))
 		fmt.Println("点赞数量：")
