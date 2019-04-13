@@ -34,17 +34,8 @@ func GetContent(html string) {
 	pattern := regexp.MustCompile(`<div class="article block untagged mb15[\s\S]*?">[\s\S]*?<div class="author clearfix">[\s\S]*?<h2>([\s\S]*?)</h2>[\s\S]*?</a>[\s\S]*?<div class="content">[\s\S]*?<span>([\s\S]*?)</span>[\s\S]*?</div>[\s\S]*?</a>[\s\S]*?<div class="stats">[\s\S]*?<i class="number">([\s\S]*?)</i>[\s\S]*?<span class="stats-comments">[\s\S]*?<a [\s\S]*?>[\s\S]*?<i class="number">([\s\S]*?)</i>[\s\S]*?</div>`)
 	results := pattern.FindAllStringSubmatch(html, -1)
 	//写入csv
-	file, err := os.Create("qiubai.csv")
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	//写入utf-8 BOM防止中文乱码
-	file.WriteString("\xEF\xBB\xBF")
-	write := csv.NewWriter(file)
 	for _, value := range results {
-		write.Write([]string{strings.Replace(value[1], "\n", "", -1), strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
-		write.Flush()
+		SaveCsv(value)
 		fmt.Println("作者：")
 		fmt.Println(strings.Replace(value[1], "\n", "", -1))
 		fmt.Println("段子内容：")
@@ -55,6 +46,34 @@ func GetContent(html string) {
 		fmt.Println(value[4])
 		fmt.Println("-------------------------------------")
 	}
+}
+
+//存入CSV
+func SaveCsv(value []string) {
+	_, err := os.Stat("qiubai.csv") //如果文件存在返回nil
+	// 如果存在则打开csv文件，不存在则创建一个csv文件
+	if err == nil {
+		file, err := os.OpenFile("qiubai.csv", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 6640)
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+		write := csv.NewWriter(file)
+		write.Write([]string{strings.Replace(value[1], "\n", "", -1), strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
+		write.Flush()
+	} else {
+		file, err := os.Create("qiubai.csv")
+		if err != nil {
+			panic(err)
+		}
+		defer file.Close()
+		//写入utf-8 BOM防止中文乱码
+		file.WriteString("\xEF\xBB\xBF")
+		write := csv.NewWriter(file)
+		write.Write([]string{strings.Replace(value[1], "\n", "", -1), strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
+		write.Flush()
+	}
+
 }
 
 func main() {
