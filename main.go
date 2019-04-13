@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
 
 //网页请求函数
@@ -38,15 +39,16 @@ func GetContent(html string) {
 		panic(err)
 	}
 	defer file.Close()
+	//写入utf-8 BOM防止中文乱码
 	file.WriteString("\xEF\xBB\xBF")
 	write := csv.NewWriter(file)
 	for _, value := range results {
-		write.Write([]string{value[1], value[2], value[3], value[4]})
+		write.Write([]string{value[1], strings.Replace(value[2], "\n", "", -1), value[3], value[4]})
 		write.Flush()
 		fmt.Println("作者：")
 		fmt.Println(value[1])
 		fmt.Println("段子内容：")
-		fmt.Println(value[2])
+		fmt.Println(strings.Replace(value[2], "\n", "", -1))
 		fmt.Println("点赞数量：")
 		fmt.Println(value[3])
 		fmt.Println("评论数量：")
