@@ -8,13 +8,14 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 //网页请求函数
-func GetHtml() string {
+func GetHtml(pagenum int) string {
 	client := &http.Client{}
-	url := "https://www.qiushibaike.com/hot/"
+	url := "https://www.qiushibaike.com/hot/page/" + strconv.Itoa(pagenum) + "/"
 	request, err := http.NewRequest("GET", url, nil)
 	request.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36")
 	if err != nil {
@@ -22,6 +23,7 @@ func GetHtml() string {
 	}
 	response, err := client.Do(request)
 	if response.StatusCode != 200 {
+		response.Body.Close()
 		fmt.Println("QiuBaiSpider request failed!", err)
 	}
 	//fmt.Println(reflect.TypeOf(response))
@@ -53,7 +55,7 @@ func SaveCsv(value []string) {
 	_, err := os.Stat("qiubai.csv") //如果文件存在返回nil
 	// 如果存在则打开csv文件，不存在则创建一个csv文件
 	if err == nil {
-		file, err := os.OpenFile("qiubai.csv", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 6640)
+		file, err := os.OpenFile("qiubai.csv", os.O_WRONLY|os.O_APPEND|os.O_CREATE, 0640)
 		if err != nil {
 			panic(err)
 		}
@@ -76,7 +78,15 @@ func SaveCsv(value []string) {
 
 }
 
+//抓取13个页面
+func Run() {
+	for i := 1; i <= 13; i++ {
+		pagenum := i
+		html := GetHtml(pagenum)
+		GetContent(html)
+	}
+}
+
 func main() {
-	html := GetHtml()
-	GetContent(html)
+	Run()
 }
